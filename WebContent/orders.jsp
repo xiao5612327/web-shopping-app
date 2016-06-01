@@ -11,25 +11,6 @@
 
 
 <body>
-<div class="collapse navbar-collapse">
-	<ul class="nav navbar-nav">
-		<li><a href="index.jsp">Home</a></li>
-		<li><a href="categories.jsp">Categories</a></li>
-		<li><a href="products.jsp">Products</a></li>
-		<li><a href="orders.jsp">Orders</a></li>
-		<li><a href="login.jsp">Logout</a></li>
-	</ul>
-</div>
-<div>
-<form action="orders.jsp" method="POST">
-	<label># of queries to insert</label>
-	<input type="number" name="queries_num">
-	<input class="btn btn-primary"  type="submit" name="submit" value="insert"/>
-</form>
-<form action="orders.jsp" method="POST">
-	<input class="btn btn-success"  type="submit" name="submit" value="refresh"/>
-</form>
-<div>
 
 <%
 	Connection conn = null;
@@ -42,15 +23,48 @@
 	}
 	catch (Exception e) {}
 	
+	String filters;
+	
 	ResultSet colResult = null;
 	ResultSet rowResult = null;
 	ResultSet row_col_Result = null;
 	Statement stmt = conn.createStatement();
 	Statement stmt2 = conn.createStatement();
 	Statement stmt3 = conn.createStatement();
- 	ResultSet rs = stmt.executeQuery("SELECT * FROM categories");
+	
+	if(request.getParameter("filter") == null){
+		filters = "All";
+	}
+	else {
+		filters = request.getParameter("filter");
+	}
+	
+	System.out.println(filters);
+	String categoryFilter = filters.equals("All") ? "p.category_id > 0" : "p.category_id =" + filters;
+	
+	String tempProducts = "(SELECT * FROM products p WHERE "+categoryFilter+") ";
+ 	ResultSet rs = stmt.executeQuery("SELECT * FROM categories ");
 
 	%>
+	<div class="collapse navbar-collapse">
+	<ul class="nav navbar-nav">
+		<li><a href="index.jsp">Home</a></li>
+		<li><a href="categories.jsp">Categories</a></li>
+		<li><a href="products.jsp">Products</a></li>
+		<li><a href="orders.jsp">Orders</a></li>
+		<li><a href="login.jsp">Logout</a></li>
+	</ul>
+	</div>
+	<div>
+	<form action="orders.jsp" method="POST">
+		<label># of queries to insert</label>
+		<input type="number" name="queries_num">
+		<input class="btn btn-primary"  type="submit" name="submit" value="insert"/>
+	</form>
+	<form action="orders.jsp" method="POST">
+		<input class="btn btn-success"  type="submit" name="submit" value="refresh"/>
+	</form>
+	<div>
 	<form action="orders.jsp" method="post">
 
 	<div class="form-group">
@@ -63,9 +77,7 @@
 		</select>
 	</div>
 
-	</form>
 	</div>
-	<form action="orders.jsp" method="POST">
 		<input class="btn btn-primary"  type="submit" name="submit" value="run"/>
 	</form>
 	
@@ -104,11 +116,7 @@
 				+"LIMIT 50) ";
 			
 			String rowSQL = "(select p.id, p.name AS product_name, COALESCE(SUM(o.price), 0) AS sum "
-					+" from ( "
-							+"select * "
-							+"from products p "
-							+"where p.category_id > 0 "
-							+") as p "
+					+" from " + tempProducts + " as p "
 						+"LEFT OUTER JOIN orders o " 
 						+"ON p.id = o.product_id "
 						+"LEFT OUTER JOIN users u "
