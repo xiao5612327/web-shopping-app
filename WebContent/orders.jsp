@@ -151,12 +151,12 @@
 	            }
 	            while(row_col_Result.next()) {
 	            	tempString = row_col_Result.getString("state");
-	             
+	            	   if (!tempString.equals(colResult.getString("state"))) {
+      	                	break;
+      	                }
 	                %>
 	                <td> <%=Math.ceil(Double.valueOf(row_col_Result.getString("sum"))*100)/100%> </td> <%
-	                		   if (!tempString.equals(colResult.getString("state"))) {
-	       	                	break;
-	       	                }
+	                		
 	            }
 				%>
 			</tr>
