@@ -29,10 +29,8 @@
 <form action="orders.jsp" method="POST">
 	<input class="btn btn-success"  type="submit" name="submit" value="refresh"/>
 </form>
+<div>
 
-<form action="orders.jsp" method="POST">
-	<input class="btn btn-primary"  type="submit" name="submit" value="run"/>
-</form>
 <%
 	Connection conn = null;
 	try {
@@ -50,8 +48,28 @@
 	Statement stmt = conn.createStatement();
 	Statement stmt2 = conn.createStatement();
 	Statement stmt3 = conn.createStatement();
+ 	ResultSet rs = stmt.executeQuery("SELECT * FROM categories");
+
+	%>
+	<form action="orders.jsp" method="post">
+
+	<div class="form-group">
+	  	<label for="filter">Sales Filtering</label>
+		<select name="filter" id="filter" class="form-control">
+			<option value="All">All</option>
+			<% while (rs.next()) { %>
+				<option value="<%=rs.getString("id")%>"><%=rs.getString("name")%></option>
+			<% } %>
+		</select>
+	</div>
+
+	</form>
+	</div>
+	<form action="orders.jsp" method="POST">
+		<input class="btn btn-primary"  type="submit" name="submit" value="run"/>
+	</form>
 	
-	
+<% 
 	if ("POST".equalsIgnoreCase(request.getMethod())) {
 		String action = request.getParameter("submit");
 		if (action.equals("insert")) {
@@ -137,6 +155,7 @@
 					</b></th>
 			<% } %>
 			<tr>
+			
 			<%
 			
 			while(colResult.next()){
@@ -152,6 +171,7 @@
 	            while(row_col_Result.next()) {
 	            	tempString = row_col_Result.getString("state");
 	            	   if (!tempString.equals(colResult.getString("state"))) {
+	            		   
       	                	break;
       	                }
 	                %>
@@ -165,6 +185,9 @@
 			}
 			%>		
 			</table>
+			<form action="orders.jsp" method="POST">
+			<input class="btn btn-primary"  type="submit" name="submit" value="run"/>
+			</form>
 <% 
 		}
 	}
