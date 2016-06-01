@@ -1,21 +1,44 @@
-CREATE OR REPLACE FUNCTION proc_insert_orders(queries INT, random INT) RETURNS void AS $$
-DECLARE
-   priceList INTEGER[];
-   productList INTEGER[];
-   idx INT;
-   diff INT;
-   tables CURSOR FOR SELECT p.id, sum(o.price) as sum FROM orders o, products p WHERE o.product_id = p.id group by p.id order by sum desc limit random * 2 offset 100 - random;
-BEGIN
-   idx := 0;
-   FOR table_record IN tables LOOP
-      priceList[idx] := table_record.sum;
-      productList[idx] := table_record.id;
-      idx := idx + 1;
-   END LOOP;
-
-   for a in 0..queries-1 LOOP
-      diff := priceList[a % random] - priceList[random + (a % random)] + 1;
-      INSERT INTO ORDERS(user_id, product_id, quantity, price, is_cart) VALUES(random() * 100 + 1, productList[random + (a % random)], 1, diff, false);
-   END LOOP;
-END;
-$$ LANGUAGE plpgsql;
+﻿select s.name AS state, p.id, COALESCE(SUM(o.price), 0) AS sum
+from users u
+RIGHT OUTER JOIN states s 
+ON s.id = u.state_id 
+cross join (
+		select * 
+		from products p
+		where p.category_id >0
+		) as p
+INNER JOIN 
+(select s.name as state, COALESCE(SUM(a.price), 0) AS sum
+from users u 
+left outer join(
+		select o.user_id, o.price, o.quantity
+		from orders o 
+		join products p
+		on o.product_id = p.id AND p.category_id > 0
+		) AS a
+ON u.id = a.user_id
+right outer join states s 
+ON s.id = u.state_id 
+GROUP BY s.name
+ORDER BY sum DESC, s.name
+LIMIT 50) l
+ON l.state = s.name
+INNER JOIN 
+(select p.id, p.name AS product_name, COALESCE(SUM(o.price), 0) AS sum
+from (
+	select * 
+	from products p
+	where p.category_id > 0
+	) as p
+LEFT OUTER JOIN orders o 
+ON p.id = o.product_id
+LEFT OUTER JOIN users u
+ON u.id = o.user_id
+GROUP BY p.id,  p.name
+ORDER BY sum DESC 
+LIMIT 50) r 
+ON r.id = p.id
+LEFT OUTER JOIN orders o 
+ON o.product_id = p.id and o.user_id = u.id
+group by s.name, p.id, p.name, l.sum, r.sum
+order by l.sum DESC, state, r.sum DESC, SUM DESC
