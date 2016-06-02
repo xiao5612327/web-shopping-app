@@ -292,6 +292,9 @@ function updateProduct(array)
 	
 	
 <% 
+	
+
+
 	//Filling in statesList
 	String query = "SELECT * FROM states_precomputed"
 					+ " ORDER BY price DESC NULLS LAST"
@@ -347,7 +350,87 @@ function updateProduct(array)
 			%> <script> makeRequest() </script><%
 		}
 		
-		else if (action.equals("run")) { }
+		else if (action.equals("run")) { 
+			String query1 = "drop table if exists products_precomputed;";
+			stmt.executeUpdate(query1);
+			String query2 = "drop table if exists states_precomputed;";
+			stmt.executeUpdate(query2);
+			String query3 = "drop table if exists cell_precomputed;";
+			stmt.executeUpdate(query3);
+				        
+			
+			String index2 = "create index bb on orders(product_id)";
+			stmt.executeUpdate(index2);
+			
+			String queryS = "CREATE TABLE states_precomputed AS "
+					+ " SELECT st.name, st.id AS sid, SUM(s.quantity*s.price) AS price "
+					+ " FROM states st "
+					+ " LEFT OUTER JOIN users u "
+					+ " ON st.id = u.state_id"
+					+ " LEFT OUTER JOIN orders s "
+					+ " ON s.user_id=u.id"
+					+ " GROUP BY st.id, st.name"
+					+ " ORDER BY price DESC nulls last";
+			stmt.executeUpdate(queryS);
+					
+			String queryP = "CREATE TABLE products_precomputed AS "
+					+ " SELECT p.name, p.id AS pid, p.category_id, COALESCE( SUM(s.quantity * s.price), 0 ) AS price "
+					+ " FROM products p "
+					+ " JOIN categories c"
+					+ " ON p.category_id = c.id"
+					+ " LEFT OUTER JOIN orders s "
+					+ " ON s.product_id = p.id  "
+					+ " GROUP BY p.id, p.name "
+					+ " ORDER BY price DESC nulls last";
+			stmt.executeUpdate(queryP);
+			
+			String queryC = "CREATE TABLE cell_precomputed AS"
+					+ " SELECT u.state_id, s.product_id, SUM(s.quantity * s.price) "
+					+ " FROM users u, orders s "
+					+ " WHERE s.user_id = u.id "
+					+ " GROUP BY u.state_id, s.product_id";
+			stmt.executeUpdate(queryC);     
+			
+			
+			String indexDrop2 = "drop index bb ";
+			stmt.executeUpdate(indexDrop2);
+			
+			//Filling in statesList
+			query = "SELECT * FROM states_precomputed"
+							+ " ORDER BY price DESC NULLS LAST"
+							+ " LIMIT 50";
+			rs = stmt.executeQuery(query);
+			while(rs.next()) {
+				String stateName = rs.getString("name");
+				Integer stateId = rs.getInt("sid");
+				Integer total = rs.getInt("price");
+				statesList.add(new StatesRows(stateName, stateId, total));
+			}
+				
+			query = "SELECT * FROM products_precomputed p"
+					+ " WHERE " + categoryFilter
+					+ " ORDER BY price DESC NULLS LAST LIMIT 50";
+			rs = stmt.executeQuery(query);
+			while (rs.next()) {
+				String productName = rs.getString(1);
+				Integer productId = rs.getInt(2);
+				Integer categoryId = rs.getInt(3);
+				Integer total = rs.getInt(4);
+				productsList.add(new ProductColumns(productName, productId, categoryId, total));    	            
+			}
+			 
+			 
+			query = "SELECT * FROM cell_precomputed x "
+					+ " WHERE x.state_id IN (SELECT sid FROM states_precomputed ORDER BY price DESC NULLS LAST LIMIT 50)"
+					+ " AND x.product_id IN (SELECT pid FROM products_precomputed ORDER BY price DESC NULLS LAST LIMIT 50)";
+			rs = stmt.executeQuery(query);
+			while (rs.next()) {
+			   	Integer stateId = rs.getInt(1);
+			    Integer productId = rs.getInt(2);
+			    Integer total = rs.getInt(3);
+			    hashmap.put(new StateProductIdPair(stateId, productId, true),total);
+			}
+		}
 			System.out.println(productsList.size());
 		%>
 			<table 
