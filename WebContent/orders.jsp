@@ -39,6 +39,7 @@ function makeRequest()
 	  },
 	  error:function(){
 		// Failed request
+		alert("failed");
 		$('#status').html('Oops! Error.');
 	  }
 	});		
@@ -56,6 +57,7 @@ function makeRequest()
 		$('#status').html('Request Sent');
 	  },
 	  success:function(data){
+		  alert("success");
 	  	var response = String(data);
 	  	var array = eval("[" + response + "]");
 	  	//alert("CEll"+array);
@@ -63,7 +65,6 @@ function makeRequest()
 	  },
 	  error:function(){
 		// Failed request
-		console.log("swag me out");
 		$('#status').html('Oops! Error.');
 	  }
 	});		
@@ -107,8 +108,7 @@ function makeRequest()
 	  },
 	  error:function(){
 		// Failed request
-		console.log("failed");
-		alert("failed");
+		
 		$('#status').html('Oops! Error.');
 	  }
 	});
@@ -255,7 +255,6 @@ function updateProduct(array)
 	
 	ResultSet rs = stmt.executeQuery("SELECT * FROM categories ");
 	
-	System.out.println(filters);
 	String categoryFilter = filters.equals("All") ? "p.category_id > 0" : "p.category_id =" + filters;
 %>
 
@@ -276,7 +275,7 @@ function updateProduct(array)
 	</form>
 	</div>
 	<form action="orders.jsp" method="POST">
-		<input class="btn btn-success"  type="submit" name="submit" value="refresh" onclick="makeRequest()"/>
+		<input class="btn btn-success"  type="submit" name="submit" value="refresh"/>
 	</form>
 	
 	
@@ -459,7 +458,7 @@ function updateProduct(array)
 			    hashmap.put(new StateProductIdPair(stateId, productId, true),total);
 			}
 		}
-			System.out.println(productsList.size());
+
 		%>
 			<table 
 			class="table table-striped"

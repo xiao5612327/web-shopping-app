@@ -17,13 +17,37 @@
 <%@page import="java.lang.Object" %>
 <%@page import="com.google.gson.*" %>
 
+<%
+
+if(request.getParameter("action").equals("asdf"))
+{
+	Connection con = null;
+	try {
+		Class.forName("org.postgresql.Driver");
+		   String url = "jdbc:postgresql://localhost:5433/shopping";
+		  	String admin = "postgres";
+		  	String password = "Asdf!23";
+  	con = DriverManager.getConnection(url, admin, password);
+	}
+	catch (Exception e) {}
+	
+	int lastId = Integer.parseInt(request.getParameter("lastId"));
+	PreparedStatement query = con.prepareStatement("SELECT * FROM log_table WHERE order_id > ? ORDER BY order_id ASC;");
+	query.setInt(1, lastId);
+	ResultSet rs = query.executeQuery();
+	JSONArray resultArray = new JSONArray();
+	if(rs.next())
+	{
+		
+	}
+}
+
+
+%>
 
 <%
-System.out.println("ajax.jsp called");
-
 if(request.getParameter("action").equals("black"))
 {
-	System.out.println("action is black");
 	ArrayList<int[]> arraylist = new ArrayList<int[]>();
 	try {
 		int sid;
@@ -35,29 +59,38 @@ if(request.getParameter("action").equals("black"))
 			   String url = "jdbc:postgresql://localhost:5433/shopping";
 			  	String admin = "postgres";
 			  	String password = "Asdf!23";
-	  		con = DriverManager.getConnection(url, admin, password);
+	  	con = DriverManager.getConnection(url, admin, password);
 		}
 		catch (Exception e) {}
-		Statement stmt = con.createStatement();
-		
 		String statement = "select sid,pid from p_u_t group by sid,pid";
 		PreparedStatement ps = con.prepareStatement(statement);
 		ResultSet rs = ps.executeQuery();
+		int index = 0;
+		JSONArray result = new JSONArray();
 		while (rs.next()) {
-
+			/*
 			int[] inner = new int[2];
 			inner[0] =rs.getInt(1);
 			inner[1] =rs.getInt(2);
 
 			arraylist.add(inner);
+			*/
+			JSONObject resultObj = new JSONObject();
+			resultObj.put("sid", rs.getInt(1));
+			resultObj.put("pid", rs.getInt(2));
+			result.add(resultObj);
 		}
 		
+		/*
 		Gson gson = new GsonBuilder().create();
 		JsonArray myCustomArray = gson.toJsonTree(arraylist).getAsJsonArray();
 		response.setContentType("application/json");	
-		response.getWriter().print(myCustomArray);		
-		response.setStatus(200);
+		response.getWriter().print(myCustomArray);				
 		con.close();
+		*/
+		
+		out.print(result);
+		out.flush();
 			
 	} catch (Exception e) {
 		e.printStackTrace();
@@ -66,9 +99,8 @@ if(request.getParameter("action").equals("black"))
 
 
 
-else if(request.getParameter("action").equals("cell"))
+if(request.getParameter("action").equals("cell"))
 {
-	System.out.println("action is cell");
 	ArrayList<int[]> arraylist = new ArrayList<int[]>();
 	try {
 		int sid;
@@ -80,40 +112,46 @@ else if(request.getParameter("action").equals("cell"))
 			   String url = "jdbc:postgresql://localhost:5433/shopping";
 			  	String admin = "postgres";
 			  	String password = "Asdf!23";
-	  		con = DriverManager.getConnection(url, admin, password);
+	  	con = DriverManager.getConnection(url, admin, password);
 		}
 		catch (Exception e) {}
 		String statement = "select sid,pid,sum(amount) from u_t group by sid,pid";
 		PreparedStatement ps = con.prepareStatement(statement);
 		ResultSet rs = ps.executeQuery();
+		JSONArray result = new JSONArray();
 		while (rs.next()) {
-
-			int[] inner = new int[3];
-			inner[0] =rs.getInt(1);
-			inner[1] =rs.getInt(2);
-			inner[2] =rs.getInt(3);
-
-			arraylist.add(inner);
+			JSONObject resultObj = new JSONObject();
+			//int[] inner = new int[3];
+			//inner[0] =rs.getInt(1);
+			//inner[1] =rs.getInt(2);
+			//inner[2] =rs.getInt(3);
+			resultObj.put("sid", rs.getInt(1));
+			resultObj.put("pid", rs.getInt(2));
+			resultObj.put("amount", rs.getInt(3));
+			result.add(resultObj);
+			//arraylist.add(inner);
 		}
 		
-		Gson gson = new GsonBuilder().create();
-		JsonArray myCustomArray = gson.toJsonTree(arraylist).getAsJsonArray();
-		response.setContentType("application/json");	
-		response.getWriter().print(myCustomArray);	
+		//Gson gson = new GsonBuilder().create();
+		//JsonArray myCustomArray = gson.toJsonTree(arraylist).getAsJsonArray();
+		//response.setContentType("application/json");	
+		//response.getWriter().print(myCustomArray);	
 		
-		Statement stmt = con.createStatement();
-		String drop = "drop table if exists p_u_t;";
-        stmt.executeUpdate(drop);
-		con.close();
+		//Statement stmt = con.createStatement();
+		//String drop = "drop table if exists p_u_t;";
+        //stmt.executeUpdate(drop);
+		//con.close();
+		
+		out.print(result);
+		out.flush();
 			
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
 }
 
-else if(request.getParameter("action").equals("state"))
+if(request.getParameter("action").equals("state"))
 {
-	System.out.println("action is state");
 	ArrayList<int[]> arraylist = new ArrayList<int[]>();
 	try {
 		int sid;
@@ -125,35 +163,47 @@ else if(request.getParameter("action").equals("state"))
 			   String url = "jdbc:postgresql://localhost:5433/shopping";
 			  	String admin = "postgres";
 			  	String password = "Asdf!23";
-	  		con = DriverManager.getConnection(url, admin, password);
+	  	con = DriverManager.getConnection(url, admin, password);
 		}
 		catch (Exception e) {}
 		String statement = "select sid,sum(amount) from u_t group by sid";
 		PreparedStatement ps = con.prepareStatement(statement);
 		ResultSet rs = ps.executeQuery();
+		JSONArray result = new JSONArray();
 		while (rs.next()) {
-
+			/*
 			int[] inner = new int[2];
 			inner[0] =rs.getInt(1);
 			inner[1] =rs.getInt(2);
 
 			arraylist.add(inner);
+			*/
+
+			JSONObject resultObj = new JSONObject();
+			
+			resultObj.put("sid", rs.getInt(1));
+			resultObj.put("amount", rs.getInt(2));
+			result.add(resultObj);
 		}		
+		/*
 		Gson gson = new GsonBuilder().create();
 		JsonArray myCustomArray = gson.toJsonTree(arraylist).getAsJsonArray();
 		response.setContentType("application/json");	
 		response.getWriter().print(myCustomArray);				
-		response.setStatus(200);
+
 		con.close();
+		*/
+		
+		out.print(result);
+		out.flush();
 			
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
 }
 
-else if(request.getParameter("action").equals("product"))
+if(request.getParameter("action").equals("product"))
 {
-	System.out.println("action is product");
 	ArrayList<int[]> arraylist = new ArrayList<int[]>();
 	try {
 		int sid;
@@ -165,26 +215,37 @@ else if(request.getParameter("action").equals("product"))
 			   String url = "jdbc:postgresql://localhost:5433/shopping";
 			  	String admin = "postgres";
 			  	String password = "Asdf!23";
-	  		con = DriverManager.getConnection(url, admin, password);
+	  	con = DriverManager.getConnection(url, admin, password);
 		}
 		catch (Exception e) {}
 		String statement = "select pid,sum(amount) from u_t group by pid";
 		PreparedStatement ps = con.prepareStatement(statement);
 		ResultSet rs = ps.executeQuery();
+		JSONArray result = new JSONArray();
 		while (rs.next()) {
-
+			/*
 			int[] inner = new int[2];
 			inner[0] =rs.getInt(1);
 			inner[1] =rs.getInt(2);
 			arraylist.add(inner);
+			*/
+			
+			JSONObject resultObj = new JSONObject();
+			
+			resultObj.put("pid", rs.getInt(1));
+			resultObj.put("amount", rs.getInt(2));
+			result.add(resultObj);
 		}		
-		Gson gson = new Gson();
-		
+		/*
+		Gson gson = new GsonBuilder().create();
 		JsonArray myCustomArray = gson.toJsonTree(arraylist).getAsJsonArray();
 		response.setContentType("application/json");	
-		response.getWriter().print(myCustomArray);				
-
+		response.getWriter().print(myCustomArray);	
+		*/
 		Statement stmt = con.createStatement();
+		
+		out.print(result);
+		out.flush();
 		
 		String drop = "drop table if exists p_u_t;";
         stmt.executeUpdate(drop);
