@@ -1,5 +1,3 @@
-TABLES
-
 
 CREATE TABLE states_precomputed AS
 SELECT st.name, st.id AS sid, SUM(s.quantity*s.price) AS price 
@@ -27,23 +25,32 @@ FROM users u, orders s
 WHERE s.user_id = u.id 
 GROUP BY u.state_id, s.product_id;
 
-CREATE TABLE u_t
+CREATE TABLE log_table
 (
-  sid integer,
-  pid integer,
-  amount integer
-)
+	order_id integer,
+	state_id integer,
+	product_id integer,
+	amount integer
+);
 
-CREATE TABLE p_u_t
-(
-  sid integer,
-  pid integer,
-  amount integer
-)
+-- DON'T NEED THIS ANYMORE
+--CREATE TABLE u_t
+--(
+--  sid integer,
+--  pid integer,
+--  amount integer
+--);
 
-CREATE INDEX cell_product_index ON cell_precomputed(product_id)
-CREATE INDEX products_id_index ON products_precomputed(pid)
-CREATE INDEX products_catid_index ON products_precomputed(category_id)
-CREATE INDEX states_id_index ON states_precomputed(sid)
+-- DON'T NEED THIS ANYMORE
+--CREATE TABLE p_u_t
+--(
+--  sid integer,
+--  pid integer,
+--  amount integer
+--);
 
+CREATE INDEX cell_product_index ON cell_precomputed(product_id);
+CREATE INDEX products_id_index ON products_precomputed(pid);
+CREATE INDEX products_catid_index ON products_precomputed(category_id);
+CREATE INDEX states_id_index ON states_precomputed(sid);
 
