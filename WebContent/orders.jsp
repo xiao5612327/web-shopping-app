@@ -20,200 +20,61 @@
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <script type="text/javascript">
-function makeRequest()
+function makeRequest(lastId)
 {
-	// back to black
 	$.ajax(
 	{
 	  type: 'POST',
-	  url: "/cse135-for-project3/ajax.jsp?action=black",
+	  url: "/cse135-for-project3/ajax.jsp?lastId="+lastId,
 	  dataType:'json',
 	  beforeSend:function(){
 		//Update Stats
 		$('#status').html('Request Sent');
 	  },
 	  success:function(response){
-	 	var data = $.parseJSON(response);
-	  	var array = eval("[" + data + "]");
-	  	updateBlack(array);
-	  },
-	  error:function(){
-		// Failed request
-		alert("failed");
-		$('#status').html('Oops! Error.');
-	  }
-	});		
-	
-	
-	
-	
-	$.ajax(
-	{
-	  type: 'POST',
-	  url: "/cse135-for-project3/ajax.jsp?action=cell",
-	  dataType:'json',
-	  beforeSend:function(){
-		//Update Stats
-		$('#status').html('Request Sent');
-	  },
-	  success:function(data){
-		  alert("success");
-	  	var response = String(data);
-	  	var array = eval("[" + response + "]");
-	  	//alert("CEll"+array);
-	  	updateCell(array);
+		  var response = String(data);
+		  var array = eval("[" + response + "]");
+		  updateTable(array);
 	  },
 	  error:function(){
 		// Failed request
 		$('#status').html('Oops! Error.');
 	  }
 	});		
-	
-	$.ajax(
-	{
-	  type: 'POST',
-	  url: "/cse135-for-project3/ajax.jsp?action=state",
-	  dataType:'json',
-	  beforeSend:function(){
-		//Update Stats
-		$('#status').html('Request Sent');
-	  },
-	  success:function(data){
-	  var response = String(data);
-	  var array = eval("[" + response + "]");
-	  //alert("state!!!"+array);
-	  updateState(array);
-	 
-	  },
-	  error:function(){
-		// Failed request
-		$('#status').html('Oops! Error.');
-	  }
-	});
-	
-	$.ajax(
-	{
-	  type: 'POST',
-	  url: "/cse135-for-project3/ajax.jsp?action=product",
-	  dataType:'json',
-	  beforeSend:function(){ 
-		//Update Stats
-		$('#status').html('Request Sent');
-	  },
-	  success:function(data){
-	  var response = String(data);
-	  var array = eval("[" + response + "]");
-	  //alert("product!!!"+array);
-	  updateProduct(array);	 
-	  },
-	  error:function(){
-		// Failed request
-		
-		$('#status').html('Oops! Error.');
-	  }
-	});
-		
 }
 
 
-function updateBlack(array)
+function updateTable(array)
 {
-	window.alert("updateBlack array is called");
-	//alert("cell!!"+array);
-	for(var i = 0; i < array.length; i= i+2)
+	for(var i = 0; i < array.length; i= i+4)
 	{				
-		var sid = array[i];	// sid 1
-		var pid = array[i + 1];	// pid 3
-		
-		
-		//alert(sid+"!"+pid);
-		var cellResult = document.getElementById("sid" + eval(sid) + "pid" + eval(pid) ); 
-		
-		if(cellResult != null)
-		{
-			cellResult.style.color = "black";
-		}
-		var stateResult = document.getElementById("sid" + eval(sid)); 
-		if(stateResult != null)
-		{
-	
-			stateResult.style.color = "black";
-		}	
-		
-		var productResult = document.getElementById("pid" + eval(pid));  
-		
-		if(productResult != null)
-		{
-			productResult.style.color = "black";
-			
-		}
-				
-	}	
-}
-
-function updateCell(array)
-{
-	console.log("updateCell array is called");
-	//alert("cell!!"+array);
-	for(var i = 0; i < array.length; i= i+3)
-	{				
-		var sid = array[i];	// sid 1
-		var pid = array[i + 1];	// pid 3
-		var price = array[i + 2];	// price 10
+		var order_id 	= array[i];	
+		var state_id 	= array[i + 1];	
+		var product_id 	= array[i + 2];
+		var amount 		= array[i + 3];
 		
 		var cellResult = document.getElementById("sid" + eval(sid) + "pid" + eval(pid) ); 
 		
 		if(cellResult != null)
 		{
-			
-			//alert(cellResult.innerHTML);
-			cellResult.innerHTML = eval(eval(cellResult.innerHTML) + price);	
+			cellResult.innerHTML = eval(eval(cellResult.innerHTML) + amount);	
 			cellResult.style.color = "red";
 		}
-	}	
-}
-
-function updateState(array)
-{
-	console.log("updateState array is called");
-	//alert("state"+array);	
-	for(var i = 0; i < array.length; i= i+2)
-	{				
-		var sid = array[i];	// sid 1
-		var price = array[i + 1];	// price 10
-
 		var stateResult = document.getElementById("sid" + eval(sid)); 
 		if(stateResult != null)
 		{
-			
 			stateResult.innerHTML = "("+eval(eval(stateResult.innerHTML) + price) + ")";	
 			stateResult.style.color = "red";
 		}	
 		
-	}
-}
-
-function updateProduct(array)
-{
-	alert("updateProduct array is called");
-	//alert("Products!!"+array);
-	for(var i = 0; i < array.length; i= i+2)
-	{			
-		var pid = array[i];	// pid 3
-		var price = array[i + 1];	// price 10
-		
 		var productResult = document.getElementById("pid" + eval(pid));  
-				
+		
 		if(productResult != null)
 		{
-			//alert(productResult.innerHTML);
 			productResult.innerHTML = "("+eval(eval(productResult.innerHTML) + price) +")";
 			productResult.style.color = "red";
-			//productResult.innerHTML = ""+eval(("("+eval(eval(productResult.innerHTML) + price) +")").fontcolor("green"));
 		}		
-		
-	}
-	
+	}	
 }
 </script>
 
@@ -297,41 +158,7 @@ function updateProduct(array)
 	
 
 
-	//Filling in statesList
-	String query = "SELECT * FROM states_precomputed"
-					+ " ORDER BY price DESC NULLS LAST"
-					+ " LIMIT 50";
-	rs = stmt.executeQuery(query);
-	while(rs.next()) {
-		String stateName = rs.getString("name");
-		Integer stateId = rs.getInt("sid");
-		double total = rs.getDouble("price");
-		statesList.add(new StatesRows(stateName, stateId, total));
-	}
-		
-	query = "SELECT * FROM products_precomputed p"
-			+ " WHERE " + categoryFilter
-			+ " ORDER BY price DESC NULLS LAST LIMIT 50";
-	rs = stmt.executeQuery(query);
-	while (rs.next()) {
-		String productName = rs.getString(1);
-		Integer productId = rs.getInt(2);
-		Integer categoryId = rs.getInt(3);
-		double total = rs.getDouble(4);
-		productsList.add(new ProductColumns(productName, productId, categoryId, total));    	            
-	}
-	 
-	 
-	query = "SELECT * FROM cell_precomputed x "
-			+ " WHERE x.state_id IN (SELECT sid FROM states_precomputed ORDER BY price DESC NULLS LAST LIMIT 50)"
-			+ " AND x.product_id IN (SELECT pid FROM products_precomputed ORDER BY price DESC NULLS LAST LIMIT 50)";
-	rs = stmt.executeQuery(query);
-	while (rs.next()) {
-	   	Integer stateId = rs.getInt(1);
-	    Integer productId = rs.getInt(2);
-	    Integer total = rs.getInt(3);
-	    hashmap.put(new StateProductIdPair(stateId, productId, true),total);
-	}
+	
 	 %>
 
  <% 
@@ -355,6 +182,7 @@ function updateProduct(array)
 			out.println("<script>alert('" + queries_num + " orders are inserted!');</script>");
 			
 			stmt = conn.createStatement();
+			/*
 			ResultSet neworders = stmt.executeQuery("SELECT s.id, o.product_id, (o.quantity * o.price) as amount "
 					+ " FROM states s, orders o, users u "
 					+ " WHERE u.state_id = s.id AND o.id > " + latestID + " AND o.user_id = u.id");
@@ -364,15 +192,24 @@ function updateProduct(array)
 				stmt = conn.createStatement();
 				stmt.execute(insertquery);
 			}
+			*/
+			ResultSet neworders = stmt.executeQuery("SELECT o.id, s.id, o.product_id, (o.quantity * o.price) as amount "
+					+ " FROM states s, orders o, users u "
+					+ " WHERE u.state_id = s.id AND o.id > " + latestID + " AND o.user_id = u.id");
+			while(neworders.next()) {
+				String insertquery = "INSERT INTO log_table(order_id, state_id, product_id, amount)"
+									+ " VALUES ("+neworders.getInt(1)+", "+neworders.getInt(2)+", "+neworders.getInt(3)+", "+neworders.getInt(4)+");";
+				stmt = conn.createStatement();
+				stmt.execute(insertquery);
+			}
 			
-		}
-		else if (action.equals("refresh")) {
-			//Need to implement.
-			%> <script> makeRequest() </script><%
-		}
-		
-		else if (action.equals("run")) { 
-			
+		}		
+		else if (action.equals("run") || action.equals("refresh") ) { 
+			if (action.equals("request")){
+				%> <script> makeRequest(latestIDthisScope) </script><%
+			}
+				
+			if (action.equals("run")) {
 			stmt = conn.createStatement();
 			rs = stmt.executeQuery("SELECT id FROM orders ORDER BY id DESC LIMIT 1");
 			rs.next();
@@ -421,9 +258,9 @@ function updateProduct(array)
 			
 			String indexDrop2 = "drop index bb ";
 			stmt.executeUpdate(indexDrop2);
-			
+			}
 			//Filling in statesList
-			query = "SELECT * FROM states_precomputed"
+			String query = "SELECT * FROM states_precomputed"
 							+ " ORDER BY price DESC NULLS LAST"
 							+ " LIMIT 50";
 			rs = stmt.executeQuery(query);
@@ -471,9 +308,9 @@ function updateProduct(array)
 				    	{							
 					%>
 					<th>
-						<%=pr.getproductName()%>
-					<div id = <%="pid"+ Integer.toString(pr.getproductId()) %> >
-					<%="("+pr.gettotal()+")"%></div>
+							<%=pr.productName%>
+							<div id = <%="pid"+ Integer.toString(pr.productId) %> >
+							<%=pr.total%></div>
 					</th>
 					<% 
 						}
@@ -481,65 +318,45 @@ function updateProduct(array)
 				<tr>
 			</thead>
 			<tbody> 
-			
-
 				<%
-					int i = 0; // Columns
-					int j = 0; // rows
-					while(j < productsList.size())
+					//int cols = 0; // Columns
+					int rows = 0; // rows
+					while(rows < productsList.size())
 					{					
 				%>
 				<tr>
-					<td><strong>
-						<%=statesList.get(j).getstateName()%>	</strong>			 
-						 <strong><div id =<%="sid" + Integer.toString(statesList.get(j).getstateId())%>>
-						 <%="("+statesList.get(j).gettotal()+")"%>
-						 </div></strong>
+					<td>
+						<b> <%= statesList.get(rows).stateName %></b>			 
+						<b><div id = <%="sid" + Integer.toString(statesList.get(rows).stateId) %>>
+						<%= statesList.get(rows).total %>
+						</div></b>
 						 
 					</td>
 				<%
-						//int swag = 0;
-						for(ProductColumns pr : productsList)
-						//System.out.println(productsList.size());
-						//for(Iterator<ProductColumns> it = productsList.iterator(); it.hasNext(); )
-		    			//for(int index = 0; index < productsList.size(); index++)
+						for(ProductColumns pcIter : productsList)
 						{
-							//ProductColumns pr = productsList.get(index);
-							StateProductIdPair a = new StateProductIdPair(statesList.get(j).getstateId(),pr.getproductId(),true);
-							if(hashmap.get(a) != null){
+							StateProductIdPair getPair = new StateProductIdPair(statesList.get(rows).stateId, pcIter.productId, true);
+							if(hashmap.get(getPair) == null){
 								%>
-								<td id = <%="sid" + Integer.toString(statesList.get(j).getstateId()) + "pid" + Integer.toString(pr.getproductId()) %>>
-								<%=hashmap.get(a)%></td>
-								<%
-							}
-							else{
-								%>
-								<td id = <%="sid" + Integer.toString(statesList.get(j).getstateId()) + "pid" + Integer.toString(pr.getproductId()) %>>
+								<td id = <%="sid" + Integer.toString(statesList.get(rows).stateId) + "pid" + Integer.toString(pcIter.productId) %>>
 								<%=0%>
 								</td>
 								<%
 							}
+							else{
+								%>
+								<td id = <%="sid" + Integer.toString(statesList.get(rows).stateId) + "pid" + Integer.toString(pcIter.productId) %>>
+								<%=hashmap.get(getPair)%></td>
+								<%
+								
+							}
 		    			}
-				    	
-						j++;
-					
+						rows++;
 					}
-			
 				%>			  				
-			  	
 		    </tbody>
-		    
-		 
 		</table>
-<%
-	
-	
-	
-	//String tempProducts = "(SELECT * FROM products p WHERE "+categoryFilter+") ";
- 	//ResultSet rs = stmt.executeQuery("SELECT * FROM categories ");
-}
-
-	%>
+	<% } %>
 
 	
 
