@@ -8,12 +8,12 @@
 </head>
 <body>
 
-</body>
-</html>
+
 
 <%@page import="java.util.List" import="helpers.*" import="java.sql.*"
 	import="java.util.*"%>
 <%@page import="org.json.simple.JSONObject"%>
+<%@page import="org.json.simple.JSONArray"%>
 <%@page import="java.lang.Object" %>
 <%@page import="com.google.gson.*" %>
 
@@ -38,6 +38,8 @@ if(request.getParameter("action").equals("black"))
 	  		con = DriverManager.getConnection(url, admin, password);
 		}
 		catch (Exception e) {}
+		Statement stmt = con.createStatement();
+		
 		String statement = "select sid,pid from p_u_t group by sid,pid";
 		PreparedStatement ps = con.prepareStatement(statement);
 		ResultSet rs = ps.executeQuery();
@@ -53,7 +55,8 @@ if(request.getParameter("action").equals("black"))
 		Gson gson = new GsonBuilder().create();
 		JsonArray myCustomArray = gson.toJsonTree(arraylist).getAsJsonArray();
 		response.setContentType("application/json");	
-		response.getWriter().print(myCustomArray);				
+		response.getWriter().print(myCustomArray);		
+		response.setStatus(200);
 		con.close();
 			
 	} catch (Exception e) {
@@ -63,7 +66,7 @@ if(request.getParameter("action").equals("black"))
 
 
 
-if(request.getParameter("action").equals("cell"))
+else if(request.getParameter("action").equals("cell"))
 {
 	System.out.println("action is cell");
 	ArrayList<int[]> arraylist = new ArrayList<int[]>();
@@ -108,7 +111,7 @@ if(request.getParameter("action").equals("cell"))
 	}
 }
 
-if(request.getParameter("action").equals("state"))
+else if(request.getParameter("action").equals("state"))
 {
 	System.out.println("action is state");
 	ArrayList<int[]> arraylist = new ArrayList<int[]>();
@@ -140,7 +143,7 @@ if(request.getParameter("action").equals("state"))
 		JsonArray myCustomArray = gson.toJsonTree(arraylist).getAsJsonArray();
 		response.setContentType("application/json");	
 		response.getWriter().print(myCustomArray);				
-
+		response.setStatus(200);
 		con.close();
 			
 	} catch (Exception e) {
@@ -148,7 +151,7 @@ if(request.getParameter("action").equals("state"))
 	}
 }
 
-if(request.getParameter("action").equals("product"))
+else if(request.getParameter("action").equals("product"))
 {
 	System.out.println("action is product");
 	ArrayList<int[]> arraylist = new ArrayList<int[]>();
@@ -175,10 +178,12 @@ if(request.getParameter("action").equals("product"))
 			inner[1] =rs.getInt(2);
 			arraylist.add(inner);
 		}		
-		Gson gson = new GsonBuilder().create();
+		Gson gson = new Gson();
+		
 		JsonArray myCustomArray = gson.toJsonTree(arraylist).getAsJsonArray();
 		response.setContentType("application/json");	
 		response.getWriter().print(myCustomArray);				
+
 		Statement stmt = con.createStatement();
 		
 		String drop = "drop table if exists p_u_t;";
@@ -198,3 +203,6 @@ if(request.getParameter("action").equals("product"))
 
 
 %>
+
+</body>
+</html>

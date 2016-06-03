@@ -32,11 +32,10 @@ function makeRequest()
 		//Update Stats
 		$('#status').html('Request Sent');
 	  },
-	  success:function(data){
-	  var response = String(data);
-	  var array = eval("[" + response + "]");
-	  updateBlack(array);
-	 
+	  success:function(response){
+	 	var data = $.parseJSON(response);
+	  	var array = eval("[" + data + "]");
+	  	updateBlack(array);
 	  },
 	  error:function(){
 		// Failed request
@@ -57,14 +56,14 @@ function makeRequest()
 		$('#status').html('Request Sent');
 	  },
 	  success:function(data){
-	  var response = String(data);
-	  var array = eval("[" + response + "]");
-	  //alert("CEll"+array);
-	  updateCell(array);
-	 
+	  	var response = String(data);
+	  	var array = eval("[" + response + "]");
+	  	//alert("CEll"+array);
+	  	updateCell(array);
 	  },
 	  error:function(){
 		// Failed request
+		console.log("swag me out");
 		$('#status').html('Oops! Error.');
 	  }
 	});		
@@ -96,7 +95,7 @@ function makeRequest()
 	  type: 'POST',
 	  url: "/cse135-for-project3/ajax.jsp?action=product",
 	  dataType:'json',
-	  beforeSend:function(){
+	  beforeSend:function(){ 
 		//Update Stats
 		$('#status').html('Request Sent');
 	  },
@@ -108,6 +107,8 @@ function makeRequest()
 	  },
 	  error:function(){
 		// Failed request
+		console.log("failed");
+		alert("failed");
 		$('#status').html('Oops! Error.');
 	  }
 	});
@@ -117,7 +118,7 @@ function makeRequest()
 
 function updateBlack(array)
 {
-	System.out.println("updateBlack array is called");
+	window.alert("updateBlack array is called");
 	//alert("cell!!"+array);
 	for(var i = 0; i < array.length; i= i+2)
 	{				
@@ -152,7 +153,7 @@ function updateBlack(array)
 
 function updateCell(array)
 {
-	System.out.println("updateCell array is called");
+	console.log("updateCell array is called");
 	//alert("cell!!"+array);
 	for(var i = 0; i < array.length; i= i+3)
 	{				
@@ -174,7 +175,7 @@ function updateCell(array)
 
 function updateState(array)
 {
-	System.out.println("updateState array is called");
+	console.log("updateState array is called");
 	//alert("state"+array);	
 	for(var i = 0; i < array.length; i= i+2)
 	{				
@@ -194,7 +195,7 @@ function updateState(array)
 
 function updateProduct(array)
 {
-	System.out.println("updateProduct array is called");
+	alert("updateProduct array is called");
 	//alert("Products!!"+array);
 	for(var i = 0; i < array.length; i= i+2)
 	{			
@@ -218,6 +219,8 @@ function updateProduct(array)
 
 
 <%
+	int latestIDthisScope;
+
 	HashMap<StateProductIdPair, Integer> hashmap = new HashMap<StateProductIdPair, Integer>();
 	List<ProductColumns> productsList = new ArrayList<ProductColumns>();
 	List<StatesRows> statesList = new ArrayList<StatesRows>();
@@ -273,7 +276,7 @@ function updateProduct(array)
 	</form>
 	</div>
 	<form action="orders.jsp" method="POST">
-		<input class="btn btn-success"  type="submit" name="submit" value="refresh"/>
+		<input class="btn btn-success"  type="submit" name="submit" value="refresh" onclick="makeRequest()"/>
 	</form>
 	
 	
@@ -303,7 +306,7 @@ function updateProduct(array)
 	while(rs.next()) {
 		String stateName = rs.getString("name");
 		Integer stateId = rs.getInt("sid");
-		Integer total = rs.getInt("price");
+		double total = rs.getDouble("price");
 		statesList.add(new StatesRows(stateName, stateId, total));
 	}
 		
@@ -315,7 +318,7 @@ function updateProduct(array)
 		String productName = rs.getString(1);
 		Integer productId = rs.getInt(2);
 		Integer categoryId = rs.getInt(3);
-		Integer total = rs.getInt(4);
+		double total = rs.getDouble(4);
 		productsList.add(new ProductColumns(productName, productId, categoryId, total));    	            
 	}
 	 
@@ -336,6 +339,13 @@ function updateProduct(array)
 	if ("POST".equalsIgnoreCase(request.getMethod())) {
 		String action = request.getParameter("submit");
 		if (action.equals("insert")) {
+			//get the latest order id
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery("SELECT id FROM orders ORDER BY id DESC LIMIT 1");
+			rs.next();
+			int latestID = rs.getInt("id");
+			System.out.println(latestID);
+			
 			int queries_num = Integer.parseInt(request.getParameter("queries_num"));
 			Random rand = new Random();
 			int random_num = rand.nextInt(30) + 1;
@@ -344,6 +354,18 @@ function updateProduct(array)
 			stmt = conn.createStatement();
 			stmt.executeQuery("SELECT proc_insert_orders(" + queries_num + "," + random_num + ")");
 			out.println("<script>alert('" + queries_num + " orders are inserted!');</script>");
+			
+			stmt = conn.createStatement();
+			ResultSet neworders = stmt.executeQuery("SELECT s.id, o.product_id, (o.quantity * o.price) as amount "
+					+ " FROM states s, orders o, users u "
+					+ " WHERE u.state_id = s.id AND o.id > " + latestID + " AND o.user_id = u.id");
+			while(neworders.next()) {
+				String insertquery = "INSERT INTO u_t(sid, pid, amount)"
+									+ " VALUES ("+neworders.getInt(1)+", "+neworders.getInt(2)+", "+neworders.getInt(3)+");";
+				stmt = conn.createStatement();
+				stmt.execute(insertquery);
+			}
+			
 		}
 		else if (action.equals("refresh")) {
 			//Need to implement.
@@ -351,6 +373,12 @@ function updateProduct(array)
 		}
 		
 		else if (action.equals("run")) { 
+			
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery("SELECT id FROM orders ORDER BY id DESC LIMIT 1");
+			rs.next();
+			latestIDthisScope = rs.getInt("id");
+			
 			String query1 = "drop table if exists products_precomputed;";
 			stmt.executeUpdate(query1);
 			String query2 = "drop table if exists states_precomputed;";
@@ -403,7 +431,7 @@ function updateProduct(array)
 			while(rs.next()) {
 				String stateName = rs.getString("name");
 				Integer stateId = rs.getInt("sid");
-				Integer total = rs.getInt("price");
+				double total = rs.getDouble("price");
 				statesList.add(new StatesRows(stateName, stateId, total));
 			}
 				
@@ -415,7 +443,7 @@ function updateProduct(array)
 				String productName = rs.getString(1);
 				Integer productId = rs.getInt(2);
 				Integer categoryId = rs.getInt(3);
-				Integer total = rs.getInt(4);
+				double total = rs.getDouble(4);
 				productsList.add(new ProductColumns(productName, productId, categoryId, total));    	            
 			}
 			 

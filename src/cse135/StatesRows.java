@@ -4,9 +4,9 @@ public class StatesRows {
 
 	public String stateName;
 	public int stateId;
-	public int total;
+	public double total;
 
-	public StatesRows(String stateName, int stateId, int total) 
+	public StatesRows(String stateName, int stateId, double total) 
 	{
 		this.stateName = stateName;
 		this.stateId = stateId;
@@ -17,7 +17,7 @@ public class StatesRows {
 		return stateName;
 	}
 
-	public int gettotal() {
+	public double gettotal() {
 		return total;
 	}
 		

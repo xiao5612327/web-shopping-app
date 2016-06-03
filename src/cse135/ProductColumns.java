@@ -4,7 +4,7 @@ public class ProductColumns {
 	public String productName;
 	public int productId;
 	public int categoryId;
-	public int total;
+	public double total;
 
 	/**
 	 * @param id
@@ -12,7 +12,7 @@ public class ProductColumns {
 	 * @param description
 	 * @param count
 	 */
-	public ProductColumns(String productName, int productId, int categoryId, int total) 
+	public ProductColumns(String productName, int productId, int categoryId, double total) 
 	{
 		this.productName = productName;
 		this.productId = productId;
@@ -29,7 +29,7 @@ public class ProductColumns {
 		return productId;
 	}
 	
-	public int gettotal() {
+	public double gettotal() {
 		return total;
 	}
 }
